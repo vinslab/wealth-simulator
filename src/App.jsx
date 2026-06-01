@@ -864,38 +864,23 @@ function ScenarioComparison({ scenarios, currentScenario, currentAge }) {
   );
 }
 
-/* ── Persistence helpers (safe for SSR / sandboxed envs) ── */
-const STORAGE_KEY = "wealth-simulator-v1";
-const loadState = () => {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) return null;
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-};
-const saveState = (state) => {
-  try {
-    if (typeof window === "undefined" || !window.localStorage) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch { /* ignore */ }
-};
+/* ── No-op persistence (intentionally disabled for privacy) ──
+   Inputs are NOT stored anywhere — they live only in memory while the tab is open.
+   Refreshing or closing the page resets everything to defaults. This is by design
+   to ensure no financial data is persisted on the user's machine. */
+const loadState = () => null;
+const saveState = () => {};
 
 /* ── Main ── */
 export default function WealthSimulator() {
-  const initial = loadState();
-  const [segments, setSegments] = useState(initial?.segments || DEFAULT_SEGMENTS);
-  const [home, setHome] = useState(initial?.home || DEFAULT_HOME);
-  const [liabilities, setLiabilities] = useState(initial?.liabilities || DEFAULT_LIABILITIES);
-  const [settings, setSettings] = useState(initial?.settings || DEFAULT_SETTINGS);
-  const [chartView, setChartView] = useState(initial?.chartView || "balance");
-  const [scenarios, setScenarios] = useState(initial?.scenarios || []);
+  const [segments, setSegments] = useState(DEFAULT_SEGMENTS);
+  const [home, setHome] = useState(DEFAULT_HOME);
+  const [liabilities, setLiabilities] = useState(DEFAULT_LIABILITIES);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [chartView, setChartView] = useState("balance");
+  const [scenarios, setScenarios] = useState([]);
   const [scenarioName, setScenarioName] = useState("");
   const st = settings;
-
-  // Persist on any change
-  useEffect(() => {
-    saveState({ segments, home, liabilities, settings, chartView, scenarios });
-  }, [segments, home, liabilities, settings, chartView, scenarios]);
 
   const portfolioNW = segments.reduce((sum, seg) => sum + seg.amount, 0);
   const homeValue = home.enabled ? home.amount : 0;
@@ -944,9 +929,6 @@ export default function WealthSimulator() {
   };
   const updateHome = (changes) => setHome(prev => ({ ...prev, ...changes }));
   const resetAll = () => {
-    if (typeof window !== "undefined" && window.localStorage) {
-      try { window.localStorage.removeItem(STORAGE_KEY); } catch {}
-    }
     setSegments(DEFAULT_SEGMENTS.map(s => ({ ...s })));
     setHome({ ...DEFAULT_HOME });
     setLiabilities(DEFAULT_LIABILITIES.map(l => ({ ...l })));
@@ -1117,7 +1099,7 @@ export default function WealthSimulator() {
           </p>
           <div style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 10px", background: "rgba(5,150,105,0.08)", border: `1px solid rgba(5,150,105,0.2)`, borderRadius: 12, fontSize: 11, fontFamily: FONTS.body, color: COLORS.green, fontWeight: 500 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.green }} />
-            Auto-saved locally · your inputs persist across reloads
+            Private · inputs are not stored or sent anywhere
           </div>
         </div>
 
