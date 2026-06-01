@@ -880,6 +880,8 @@ export default function WealthSimulator() {
   const [chartView, setChartView] = useState("balance");
   const [scenarios, setScenarios] = useState([]);
   const [scenarioName, setScenarioName] = useState("");
+  const [hideUnusedAssets, setHideUnusedAssets] = useState(false);
+  const [hideUnusedDebt, setHideUnusedDebt] = useState(false);
   const st = settings;
 
   const portfolioNW = segments.reduce((sum, seg) => sum + seg.amount, 0);
@@ -1260,6 +1262,16 @@ export default function WealthSimulator() {
                 </div>
                 <button onClick={() => { const allHist = segments.every(seg => seg.useHistorical); setSegments(segments.map(seg => ({ ...seg, useHistorical: !allHist }))); }}
                   style={{ background: "rgba(8,145,178,0.08)", border: `1px solid rgba(8,145,178,0.3)`, borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontFamily: FONTS.body, fontSize: 11, color: COLORS.accent, fontWeight: 500 }}>Toggle Historical</button>
+                <button onClick={() => setHideUnusedAssets(!hideUnusedAssets)}
+                  style={{
+                    background: hideUnusedAssets ? "rgba(124,58,237,0.1)" : "transparent",
+                    border: `1px solid ${hideUnusedAssets ? COLORS.purple : COLORS.border}`,
+                    borderRadius: 6, padding: "5px 10px", cursor: "pointer",
+                    fontFamily: FONTS.body, fontSize: 11,
+                    color: hideUnusedAssets ? COLORS.purple : COLORS.textMuted, fontWeight: 500,
+                  }}>
+                  {hideUnusedAssets ? "Show All" : "Hide Unused"}
+                </button>
                 <button onClick={resetAll}
                   style={{ background: "rgba(220,38,38,0.06)", border: `1px solid rgba(220,38,38,0.2)`, borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontFamily: FONTS.body, fontSize: 11, color: COLORS.red, fontWeight: 500 }}>Reset</button>
               </div>
@@ -1289,11 +1301,19 @@ export default function WealthSimulator() {
               </div>
             )}
 
-            {segments.map((seg, i) => (
-              <SegmentRow key={seg.id} segment={seg} color={getSegmentColor(seg)} onUpdate={(u) => updateSegment(i, u)}
-                onRemove={() => removeSegment(i)}
-                totalNW={portfolioNW} allocationMode={st.allocationMode} />
-            ))}
+            {segments.map((seg, i) => {
+              if (hideUnusedAssets && seg.amount === 0) return null;
+              return (
+                <SegmentRow key={seg.id} segment={seg} color={getSegmentColor(seg)} onUpdate={(u) => updateSegment(i, u)}
+                  onRemove={() => removeSegment(i)}
+                  totalNW={portfolioNW} allocationMode={st.allocationMode} />
+              );
+            })}
+            {hideUnusedAssets && segments.filter(s => s.amount === 0).length > 0 && (
+              <div style={{ padding: "10px 16px", borderBottom: `1px solid ${COLORS.border}`, background: COLORS.input, fontFamily: FONTS.body, fontSize: 11, color: COLORS.textDim, textAlign: "center", fontStyle: "italic" }}>
+                {segments.filter(s => s.amount === 0).length} unused {segments.filter(s => s.amount === 0).length === 1 ? "category is" : "categories are"} hidden · click "Show All" to reveal
+              </div>
+            )}
             <div style={{ padding: "12px 16px", display: "flex", justifyContent: "center", background: COLORS.card }}>
               <button onClick={addCustomSegment}
                 style={{
@@ -1323,11 +1343,29 @@ export default function WealthSimulator() {
                 Subtracted from gross assets to calculate true net worth · {formatFull(totalLiabilities)} total debt
               </div>
             </div>
+            <button onClick={() => setHideUnusedDebt(!hideUnusedDebt)}
+              style={{
+                background: hideUnusedDebt ? "rgba(124,58,237,0.1)" : "transparent",
+                border: `1px solid ${hideUnusedDebt ? COLORS.purple : COLORS.border}`,
+                borderRadius: 6, padding: "5px 10px", cursor: "pointer",
+                fontFamily: FONTS.body, fontSize: 11,
+                color: hideUnusedDebt ? COLORS.purple : COLORS.textMuted, fontWeight: 500,
+              }}>
+              {hideUnusedDebt ? "Show All" : "Hide Unused"}
+            </button>
           </div>
-          {liabilities.map((l, i) => (
-            <LiabilityRow key={l.id} liability={l} color={getLiabilityColor(l)} onUpdate={(u) => updateLiability(i, u)}
-              onRemove={() => removeLiability(i)} />
-          ))}
+          {liabilities.map((l, i) => {
+            if (hideUnusedDebt && l.amount === 0) return null;
+            return (
+              <LiabilityRow key={l.id} liability={l} color={getLiabilityColor(l)} onUpdate={(u) => updateLiability(i, u)}
+                onRemove={() => removeLiability(i)} />
+            );
+          })}
+          {hideUnusedDebt && liabilities.filter(l => l.amount === 0).length > 0 && (
+            <div style={{ padding: "10px 16px", borderBottom: `1px solid ${COLORS.border}`, background: COLORS.input, fontFamily: FONTS.body, fontSize: 11, color: COLORS.textDim, textAlign: "center", fontStyle: "italic" }}>
+              {liabilities.filter(l => l.amount === 0).length} unused {liabilities.filter(l => l.amount === 0).length === 1 ? "debt is" : "debts are"} hidden · click "Show All" to reveal
+            </div>
+          )}
           <div style={{ padding: "12px 16px", display: "flex", justifyContent: "center", background: COLORS.card }}>
             <button onClick={addCustomLiability}
               style={{
