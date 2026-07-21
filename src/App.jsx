@@ -1090,9 +1090,6 @@ export default function WealthSimulator() {
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
         {/* Header */}
         <div style={{ marginBottom: 36, textAlign: "center" }}>
-          <div style={{ fontSize: 11, color: COLORS.accent, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 8 }}>
-            Wealth Building Tool · 01
-          </div>
           <h1 style={{ fontFamily: FONTS.display, fontSize: 38, fontWeight: 400, margin: "0 0 8px", color: COLORS.text }}>
             Net Worth Simulator
           </h1>
