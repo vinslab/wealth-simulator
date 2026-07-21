@@ -1094,7 +1094,7 @@ export default function WealthSimulator() {
             Wealth Building Tool · 01
           </div>
           <h1 style={{ fontFamily: FONTS.display, fontSize: 38, fontWeight: 400, margin: "0 0 8px", color: COLORS.text }}>
-            Net Worth Growth Simulator
+            Net Worth Simulator
           </h1>
           <p style={{ fontSize: 14, color: COLORS.textDim, margin: 0, maxWidth: 580, marginInline: "auto" }}>
             Model your wealth across asset classes with inflation, taxes, prioritized withdrawals, and scenario comparison.
